@@ -35,9 +35,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="APC.c" />
     <ClCompile Include="Device.c" />
     <ClCompile Include="FsFilter.c" />
     <ClCompile Include="Helper.c" />
+    <ClCompile Include="Injection.c" />
+    <ClCompile Include="InjectionUtils.c" />
     <ClCompile Include="PsMonitor.c" />
     <ClCompile Include="PsTable.c" />
     <ClCompile Include="RedDriver.c" />
@@ -201,11 +204,16 @@
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="APC.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="DeviceAPI.h" />
     <ClInclude Include="FsFilter.h" />
     <ClInclude Include="Helper.h" />
+    <ClInclude Include="Injection.h" />
+    <ClInclude Include="InjectionStructs.h" />
+    <ClInclude Include="InjectionUtils.h" />
     <ClInclude Include="Logging.h" />
+    <ClInclude Include="NT.h" />
     <ClInclude Include="PsMonitor.h" />
     <ClInclude Include="PsTable.h" />
     <ClInclude Include="RedDriver.h" />

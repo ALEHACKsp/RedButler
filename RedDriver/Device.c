@@ -1,3 +1,4 @@
+#include <ntifs.h>
 #include <ntddk.h>
 
 #include "Logging.h"
@@ -5,10 +6,13 @@
 #include "PsMonitor.h"
 #include "DeviceAPI.h"
 #include "PsTable.h"
+#include "Injection.h"
 #include "Device.h"
 
 BOOLEAN					g_deviceInitialized = FALSE;
 PDEVICE_OBJECT			g_deviceObject = NULL;
+
+NTKERNELAPI BOOLEAN NTAPI PsIsProtectedProcess(IN PEPROCESS Process);
 
 // ====================================================================
 
@@ -51,6 +55,30 @@ NTSTATUS IOGetProcessAttributes(PBUT_PROCESS_STATE_PACKET pPacket, SIZE_T szSize
 
 	pOutPacket->bExcluded = entry.bExcluded;
 	pOutPacket->bProtected = entry.bProtected;
+}
+
+NTSTATUS IOInjectDLL(PBUT_DLL_INJECTION_PACKET pPacket, SIZE_T szSize) {
+	if (szSize < sizeof(PBUT_DLL_INJECTION_PACKET)) {
+		return STATUS_INVALID_PARAMETER;
+	}
+	UNICODE_STRING dllPath;
+	RtlInitUnicodeString(&dllPath, pPacket->wDllPath);
+	
+	NTSTATUS status;
+	PEPROCESS peProcess;
+
+	status = PsLookupProcessByProcessId((HANDLE)pPacket->dwProcessId, &peProcess);
+	if (!NT_SUCCESS(status)) {
+		LogError("Failed to lookup process %p", (HANDLE)pPacket->dwProcessId);
+		return status;
+	}
+
+	if (PsIsProtectedProcess(peProcess)) {
+		LogInfo("Denying dll injection into protected process.");
+		return STATUS_ACCESS_DENIED;
+	}
+
+	return InjectDLL(pPacket->dwProcessId, &dllPath);
 }
 
 // ====================================================================
@@ -140,6 +168,12 @@ NTSTATUS IRPIoControl(PDEVICE_OBJECT pDeviceObject, PIRP pIrp) {
 
 		case BUT_IOCTL_CLEAR_PROCESS_ATTRIBUTES: {
 			statusPacket.ntStatus = IOClearProcessAttributes((PBUT_PROCESS_STATE_PACKET)pInputBuffer,
+				szInputBufferSize);
+			break;
+		}
+
+		case BUT_IOCTL_INJECT_DLL: {
+			statusPacket.ntStatus = IOInjectDLL((PBUT_DLL_INJECTION_PACKET)pInputBuffer,
 				szInputBufferSize);
 			break;
 		}

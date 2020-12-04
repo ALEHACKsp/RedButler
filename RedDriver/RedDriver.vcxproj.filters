@@ -35,6 +35,12 @@
     <Filter Include="Source Files\Utils">
       <UniqueIdentifier>{0a628262-83f4-4202-b89b-50051edcd835}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Injection">
+      <UniqueIdentifier>{7f804919-aa96-449b-b209-34c8bb1c6fa9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Injection">
+      <UniqueIdentifier>{624af68c-1f07-44a1-91e2-b2ca11757867}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Inf Include="RedDriver.inf">
@@ -59,6 +65,15 @@
     </ClCompile>
     <ClCompile Include="PsMonitor.c">
       <Filter>Source Files\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="APC.c">
+      <Filter>Source Files\Injection</Filter>
+    </ClCompile>
+    <ClCompile Include="Injection.c">
+      <Filter>Source Files\Injection</Filter>
+    </ClCompile>
+    <ClCompile Include="InjectionUtils.c">
+      <Filter>Source Files\Injection</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -88,6 +103,21 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="APC.h">
+      <Filter>Header Files\Injection</Filter>
+    </ClInclude>
+    <ClInclude Include="Injection.h">
+      <Filter>Header Files\Injection</Filter>
+    </ClInclude>
+    <ClInclude Include="InjectionStructs.h">
+      <Filter>Header Files\Injection</Filter>
+    </ClInclude>
+    <ClInclude Include="InjectionUtils.h">
+      <Filter>Header Files\Injection</Filter>
+    </ClInclude>
+    <ClInclude Include="NT.h">
+      <Filter>Header Files\Injection</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
