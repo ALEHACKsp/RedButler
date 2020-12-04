@@ -207,13 +207,19 @@ NTSTATUS SetProcessExclusion(HANDLE hProcessId, BOOLEAN bExcluded) {
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS GetProcessAttributes(PPROCESS_TABLE_ENTRY pEntry) {
+NTSTATUS GetProcessAttributes(HANDLE hProcessId, PPROCESS_TABLE_ENTRY pEntry) {
+	PROCESS_TABLE_ENTRY entry;
+
+	entry.hProcessId = hProcessId;
+
 	ExAcquireFastMutex(&g_processTableLock);
-	if (!GetProcessInProcessTable(pEntry)) {
+	if (!GetProcessInProcessTable(&entry)) {
 		ExReleaseFastMutex(&g_processTableLock);
 		return STATUS_UNSUCCESSFUL;
 	}
 	ExReleaseFastMutex(&g_processTableLock);
+	*pEntry = entry;
+
 	return STATUS_SUCCESS;
 }
 

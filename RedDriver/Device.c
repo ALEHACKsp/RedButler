@@ -4,6 +4,7 @@
 #include "RedDriver.h"
 #include "PsMonitor.h"
 #include "DeviceAPI.h"
+#include "PsTable.h"
 #include "Device.h"
 
 BOOLEAN					g_deviceInitialized = FALSE;
@@ -33,6 +34,23 @@ NTSTATUS IOClearProcessAttributes(PBUT_PROCESS_STATE_PACKET pPacket, SIZE_T szSi
 	}
 
 	return ClearProcessAttributes((HANDLE)pPacket->dwProcessId);
+}
+
+NTSTATUS IOGetProcessAttributes(PBUT_PROCESS_STATE_PACKET pPacket, SIZE_T szSize, 
+	PBUT_PROCESS_STATE_PACKET pOutPacket, SIZE_T szOutSize) {
+
+	if (szSize < sizeof(BUT_PROCESS_STATE_PACKET) || szOutSize < sizeof(BUT_PROCESS_STATE_PACKET)) {
+		return STATUS_INVALID_PARAMETER;
+	}
+
+	PROCESS_TABLE_ENTRY entry;
+	NTSTATUS status = GetProcessAttributes((HANDLE)pPacket->dwProcessId, &entry);
+	if (!NT_SUCCESS(status)) {
+		return status;
+	}
+
+	pOutPacket->bExcluded = entry.bExcluded;
+	pOutPacket->bProtected = entry.bProtected;
 }
 
 // ====================================================================
@@ -111,6 +129,12 @@ NTSTATUS IRPIoControl(PDEVICE_OBJECT pDeviceObject, PIRP pIrp) {
 		case BUT_IOCTL_CHANGE_PROCESS_EXCLUSION: {
 			statusPacket.ntStatus = IOChangeProcessExclusion((PBUT_PROCESS_STATE_PACKET)pInputBuffer,
 				szInputBufferSize);
+			break;
+		}
+
+		case BUT_IOCTL_GET_PROCESS_ATTRIBUTES: {
+			statusPacket.ntStatus = IOGetProcessAttributes((PBUT_PROCESS_STATE_PACKET)pInputBuffer,
+				szInputBufferSize, (PBUT_PROCESS_STATE_PACKET)pOutputBuffer, szOutputBufferSize);
 			break;
 		}
 
