@@ -70,6 +70,8 @@ BOOLEAN UpdateProcessInProcessTable(PPROCESS_TABLE_ENTRY pEntry) {
 }
 
 NTSTATUS InitializeProcessTable(VOID(*InitProcessEntryCallback)(PPROCESS_TABLE_ENTRY, PCUNICODE_STRING)) {
+	LogTrace("Initializing process table...");
+
 	PSYSTEM_PROCESS_INFORMATION processInfo = NULL, first;
 	NTSTATUS status;
 	SIZE_T size = 0, offset;
@@ -139,6 +141,8 @@ NTSTATUS InitializeProcessTable(VOID(*InitProcessEntryCallback)(PPROCESS_TABLE_E
 }
 
 VOID DestroyProcessTable() {
+	LogTrace("Destroying process table...");
+
 	PPROCESS_TABLE_ENTRY entry;
 	PVOID restartKey = NULL;
 

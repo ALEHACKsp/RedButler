@@ -125,6 +125,8 @@ FLT_POSTOP_CALLBACK_STATUS FltDirCtrlPostOperation(PFLT_CALLBACK_DATA pData,
 // ====================================================================
 
 NTSTATUS InitializeFSMiniFilter(PDRIVER_OBJECT pDriverObject) {
+	LogTrace("Initializing FS minifilter...");
+
 	NTSTATUS status;
 	status = FltRegisterFilter(pDriverObject, &FilterRegistration, &g_filterHandle);
 	if (NT_SUCCESS(status)) {
@@ -141,6 +143,7 @@ NTSTATUS InitializeFSMiniFilter(PDRIVER_OBJECT pDriverObject) {
 		g_fsMonitorInitialized = TRUE;
 	}
 
+	LogTrace("Initialization completed.");
 	return status;
 }
 
@@ -148,11 +151,13 @@ NTSTATUS DestroyFSMiniFilter() {
 	if (!g_fsMonitorInitialized)
 		return STATUS_NOT_FOUND;
 
+	LogTrace("Destroying FS minifilter...");
+
 	FltUnregisterFilter(g_filterHandle);
 	g_filterHandle = NULL;
 
 	g_fsMonitorInitialized = FALSE;
 
-	LogTrace("Deitialization is completed");
+	LogTrace("Deitialization completed.");
 	return STATUS_SUCCESS;
 }
