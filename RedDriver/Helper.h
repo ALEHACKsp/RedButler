@@ -1,6 +1,8 @@
 #pragma once
 #include <ntddk.h>
 
+#define NORMALIZE_INCREMENT (USHORT)0x200
+
 typedef enum _SYSTEM_INFORMATION_CLASS {
 	SystemBasicInformation = 0,
 	SystemPerformanceInformation = 2,

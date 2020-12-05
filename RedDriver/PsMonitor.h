@@ -1,6 +1,9 @@
 #pragma once
 #include "PsTable.h"
 
+BOOLEAN IsProcessExcluded(HANDLE hProcessId);
+BOOLEAN IsProcessProtected(HANDLE hProcessId);
+
 NTSTATUS SetProcessProtection(HANDLE hProcessId, BOOLEAN bProtected);
 NTSTATUS SetProcessExclusion(HANDLE hProcessId, BOOLEAN bExcluded);
 NTSTATUS ClearProcessAttributes(HANDLE hProcessId);

@@ -37,6 +37,7 @@
   <ItemGroup>
     <ClCompile Include="APC.c" />
     <ClCompile Include="Device.c" />
+    <ClCompile Include="ExclusionList.c" />
     <ClCompile Include="FsFilter.c" />
     <ClCompile Include="Helper.c" />
     <ClCompile Include="Injection.c" />
@@ -211,6 +212,7 @@
     <ClInclude Include="APC.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="DeviceAPI.h" />
+    <ClInclude Include="ExclusionList.h" />
     <ClInclude Include="FsFilter.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="Injection.h" />

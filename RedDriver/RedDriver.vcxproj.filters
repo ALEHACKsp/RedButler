@@ -75,6 +75,9 @@
     <ClCompile Include="InjectionUtils.c">
       <Filter>Source Files\Injection</Filter>
     </ClCompile>
+    <ClCompile Include="ExclusionList.c">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RedDriver.h">
@@ -118,6 +121,9 @@
     </ClInclude>
     <ClInclude Include="NT.h">
       <Filter>Header Files\Injection</Filter>
+    </ClInclude>
+    <ClInclude Include="ExclusionList.h">
+      <Filter>Header Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

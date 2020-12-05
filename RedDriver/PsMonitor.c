@@ -23,6 +23,41 @@ WCHAR						g_csrssPathBuffer[CSRSS_PATH_BUFFER_SIZE];
 
 // ====================================================================
 
+BOOLEAN IsProcessExcluded(HANDLE hProcessId) {
+	PROCESS_TABLE_ENTRY entry;
+	BOOLEAN result;
+
+	entry.hProcessId = hProcessId;
+
+	ExAcquireFastMutex(&g_processTableLock);
+	result = GetProcessInProcessTable(&entry);
+	ExReleaseFastMutex(&g_processTableLock);
+
+	if (!result)
+		return FALSE;
+
+	if (entry.bSubsystem)
+		return TRUE;
+
+	return entry.bExcluded;
+}
+
+BOOLEAN IsProcessProtected(HANDLE hProcessId) {
+	PROCESS_TABLE_ENTRY entry;
+	BOOLEAN result;
+
+	entry.hProcessId = hProcessId;
+
+	ExAcquireFastMutex(&g_processTableLock);
+	result = GetProcessInProcessTable(&entry);
+	ExReleaseFastMutex(&g_processTableLock);
+
+	if (!result)
+		return FALSE;
+
+	return entry.bProtected;
+}
+
 BOOLEAN CheckProtectedOperation(HANDLE hSource, HANDLE hDestination) {
 	PROCESS_TABLE_ENTRY srcInfo, dstInfo;
 	BOOLEAN bResult;
