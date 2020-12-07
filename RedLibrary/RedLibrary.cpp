@@ -1,10 +1,86 @@
 #include "RedLibrary.h"
 #include "../RedDriver/DeviceAPI.h"
 
+#include <Windows.h>
+#include <iostream>
+#include <stdlib.h>
+#include <string.h>
+#include <malloc.h>
 #include <wchar.h>
-#include <stdarg.h>
 
 using namespace Red;
+
+typedef struct _LSA_UNICODE_STRING {
+	USHORT Length;
+	USHORT MaximumLength;
+	PWSTR  Buffer;
+} LSA_UNICODE_STRING, * PLSA_UNICODE_STRING, UNICODE_STRING, * PUNICODE_STRING;
+
+typedef struct _RTL_RELATIVE_NAME {
+	UNICODE_STRING RelativeName;
+	HANDLE         ContainingDirectory;
+	void* CurDirRef;
+} RTL_RELATIVE_NAME, * PRTL_RELATIVE_NAME;
+
+typedef BOOLEAN(NTAPI* RtlDosPathNameToRelativeNtPathName_U_Prototype)(
+	_In_       PCWSTR DosFileName,
+	_Out_      PUNICODE_STRING NtFileName,
+	_Out_opt_  PWSTR* FilePath,
+	_Out_opt_  PRTL_RELATIVE_NAME RelativeName
+	);
+
+bool ConvertToNtPath(const wchar_t* path, wchar_t* normalized, size_t normalizedLen) {
+	UNICODE_STRING ntPath;
+	DWORD size;
+	bool result = false;
+
+	size = GetFullPathNameW(path, (DWORD)normalizedLen, normalized, NULL);
+	if (size == 0)
+		return false;
+
+	memset(&ntPath, 0, sizeof(ntPath));
+
+	RtlDosPathNameToRelativeNtPathName_U_Prototype RtlDosPathNameToRelativeNtPathName_U = nullptr;
+	*(FARPROC*)&RtlDosPathNameToRelativeNtPathName_U = GetProcAddress(
+		GetModuleHandleW(L"ntdll.dll"),
+		"RtlDosPathNameToRelativeNtPathName_U"
+	);
+
+	if (RtlDosPathNameToRelativeNtPathName_U(normalized, &ntPath, NULL, NULL) == FALSE)
+		return false;
+
+	if (normalizedLen * sizeof(wchar_t) > ntPath.Length) {
+		memcpy(normalized, ntPath.Buffer, ntPath.Length);
+		normalized[ntPath.Length / sizeof(wchar_t)] = L'\0';
+		result = true;
+	}
+
+	HeapFree(GetProcessHeap(), 0, ntPath.Buffer);
+
+	return result;
+}
+
+NTSTATUS AllocNormalizedPath(const wchar_t* path, wchar_t** normalized) {
+	enum { NORMALIZATION_OVERHEAD = 32 };
+	wchar_t* buf;
+	size_t len;
+
+	len = wcslen(path) + NORMALIZATION_OVERHEAD;
+
+	buf = (wchar_t*)malloc(len * sizeof(wchar_t));
+	if (!buf)
+		return ERROR_NOT_ENOUGH_MEMORY;
+
+	if (!ConvertToNtPath(path, buf, len)) {
+		free(buf);
+		return ERROR_INVALID_DATA;
+	}
+
+	*normalized = buf;
+	return ERROR_SUCCESS;
+}
+
+// ====================================================================
 
 Exception::Exception(unsigned int code, const wchar_t* format, ...) : errorCode(code) {
 	wchar_t buffer[256];
@@ -75,7 +151,7 @@ void Butler::SetState(bool state) {
 	BUT_STATUS_PACKET result;
 	DWORD dwReturned;
 	BOOLEAN bState = state ? TRUE : FALSE;
-	if (!DeviceIoControl(hDriver, BUT_IOCTL_SET_DRIVER_STATE, &bState, 
+	if (!DeviceIoControl(hDriver, BUT_IOCTL_SET_DRIVER_STATE, &bState,
 		sizeof(BOOLEAN), &result, sizeof(BUT_STATUS_PACKET), &dwReturned, NULL)) {
 
 		throw Red::Exception(result.ntStatus, L"Failed to set driver state.");
@@ -242,7 +318,10 @@ void Butler::InjectDLL(DWORD dwProcessId, std::wstring dllPath) {
 	DWORD dwReturned;
 
 	packet.dwProcessId = dwProcessId;
-	wcscpy(packet.wDllPath, dllPath.c_str());
+	wchar_t* normalized;
+
+	AllocNormalizedPath(dllPath.c_str(), &normalized);
+	wcscpy(packet.wDllPath, normalized);
 
 	if (!DeviceIoControl(hDriver, BUT_IOCTL_INJECT_DLL, &packet,
 		sizeof(BUT_DLL_INJECTION_PACKET), &result, sizeof(BUT_STATUS_PACKET), &dwReturned, NULL)) {
@@ -259,8 +338,10 @@ ULONG Butler::HideFile(std::wstring filePath) {
 	BUT_STATUS_PACKET result;
 	BUT_HIDE_FILE_PACKET packet;
 	DWORD dwReturned;
+	wchar_t* normalized;
 
-	wcscpy(packet.wFullPath, filePath.c_str());
+	AllocNormalizedPath(filePath.c_str(), &normalized);
+	wcscpy(packet.wFullPath, normalized);
 
 	if (!DeviceIoControl(hDriver, BUT_IOCTL_HIDE_FILE, &packet,
 		sizeof(BUT_HIDE_FILE_PACKET), &result, sizeof(BUT_STATUS_PACKET), &dwReturned, NULL)) {
@@ -297,7 +378,7 @@ void Butler::UnhideAllFiles() {
 	BUT_STATUS_PACKET result;
 	DWORD dwReturned;
 
-	if (!DeviceIoControl(hDriver, BUT_IOCTL_UNHIDE_ALL_FILES, NULL, 0, 
+	if (!DeviceIoControl(hDriver, BUT_IOCTL_UNHIDE_ALL_FILES, NULL, 0,
 		&result, sizeof(BUT_STATUS_PACKET), &dwReturned, NULL)) {
 		throw Red::Exception(result.ntStatus, L"Failed to unhide all files.");
 	}
@@ -312,7 +393,10 @@ ULONG Butler::HideDirectory(std::wstring directoryPath) {
 	BUT_HIDE_DIRECTORY_PACKET packet;
 	DWORD dwReturned;
 
-	wcscpy(packet.wFullPath, directoryPath.c_str());
+	wchar_t* normalized;
+
+	AllocNormalizedPath(directoryPath.c_str(), &normalized);
+	wcscpy(packet.wFullPath, normalized);
 
 	if (!DeviceIoControl(hDriver, BUT_IOCTL_HIDE_DIRECTORY, &packet,
 		sizeof(BUT_HIDE_DIRECTORY_PACKET), &result, sizeof(BUT_STATUS_PACKET), &dwReturned, NULL)) {
