@@ -120,12 +120,6 @@ OB_PREOP_CALLBACK_STATUS ProcessPreCallback(PVOID pRegistrationContext,
 		return OB_PREOP_SUCCESS;
 	}
 
-	LogInfo("Process object operation, destPid: %p, srcTid: %p, oper: %s, space: %s",
-		PsGetProcessId(pOperationInformation->Object), PsGetCurrentThreadId(),
-		(pOperationInformation->Operation == OB_OPERATION_HANDLE_CREATE ? "create" : "dup"),
-		(pOperationInformation->KernelHandle ? "kernel" : "user")
-	);
-
 	if (!CheckProtectedOperation(PsGetCurrentProcessId(), PsGetProcessId(pOperationInformation->Object))) {
 		return OB_PREOP_SUCCESS;
 	}
@@ -148,14 +142,6 @@ OB_PREOP_CALLBACK_STATUS ThreadPreCallback(PVOID pRegistrationContext, POB_PRE_O
 
 	if (pOperationInformation->KernelHandle)
 		return OB_PREOP_SUCCESS;
-
-	LogInfo("Thread object operation, destPid: %d, destTid:%d, srcPid:%d, oper:%s, space:%s",
-		(ULONG)PsGetThreadProcessId(pOperationInformation->Object),
-		(ULONG)PsGetThreadId(pOperationInformation->Object),
-		(ULONG)PsGetCurrentProcessId(),
-		(pOperationInformation->Operation == OB_OPERATION_HANDLE_CREATE ? "create" : "dup"),
-		(pOperationInformation->KernelHandle ? "kernel" : "user")
-	);
 
 	if (!CheckProtectedOperation(PsGetCurrentProcessId(), PsGetThreadProcessId(pOperationInformation->Object))) {
 		return OB_PREOP_SUCCESS;

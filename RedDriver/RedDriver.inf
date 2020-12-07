@@ -90,5 +90,5 @@ DiskId1                 = "RedButler Device Installation Disk"
 ;Instances specific information.
 DefaultInstance         = "RedButler Instance"
 Instance1.Name          = "RedButler Instance"
-Instance1.Altitude       = "370030 "
+Instance1.Altitude       = "370030"
 Instance1.Flags         = 0x0              ; Allow all attachments

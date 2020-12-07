@@ -174,7 +174,7 @@ NTSTATUS CleanFileBothDirectoryInformation(PFILE_BOTH_DIR_INFORMATION pInfo, PFL
 				}
 			}
 
-			LogTrace("Removed from query: %wZ\\%wZ", &pFltName->Name, &fileName);
+			LogTrace("Removed from query: %wZ\\%wZ\n", &pFltName->Name, &fileName);
 
 			if (retn)
 				return status;
@@ -387,7 +387,7 @@ NTSTATUS CleanFileIdBothDirectoryInformation(PFILE_ID_BOTH_DIR_INFORMATION pInfo
 				}
 			}
 
-			LogTrace("Removed from query: %wZ\\%wZ", &pFltName->Name, &fileName);
+			LogTrace("Removed from query: %wZ\\%wZ\n", &pFltName->Name, &fileName);
 
 			if (retn)
 				return status;
@@ -503,8 +503,6 @@ FLT_PREOP_CALLBACK_STATUS FltCreatePreOperation(PFLT_CALLBACK_DATA pData,
 	if (!IsDriverEnabled())
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 
-	LogInfo("%wZ (options: %x)", &pData->Iopb->TargetFileObject->FileName, pData->Iopb->Parameters.Create.Options);
-
 	if (IsProcessExcluded(PsGetCurrentProcessId()))
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 
@@ -514,7 +512,7 @@ FLT_PREOP_CALLBACK_STATUS FltCreatePreOperation(PFLT_CALLBACK_DATA pData,
 	status = FltGetFileNameInformation(pData, FLT_FILE_NAME_NORMALIZED, &pFltName);
 	if (!NT_SUCCESS(status)) {
 		if (status != STATUS_OBJECT_PATH_NOT_FOUND)
-			LogWarning("FltGetFileNameInformation() failed with code:%08x", status);
+			LogWarning("FltGetFileNameInformation() failed with code %08x.", status);
 
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
@@ -532,7 +530,7 @@ FLT_PREOP_CALLBACK_STATUS FltCreatePreOperation(PFLT_CALLBACK_DATA pData,
 	FltReleaseFileNameInformation(pFltName);
 
 	if (neededPrevent) {
-		LogTrace("Operation has been cancelled for: %wZ", &pData->Iopb->TargetFileObject->FileName);
+		LogTrace("Operation has been cancelled for %wZ.", &pData->Iopb->TargetFileObject->FileName);
 		pData->IoStatus.Status = STATUS_NO_SUCH_FILE;
 		return FLT_PREOP_COMPLETE;
 	}
@@ -548,8 +546,6 @@ FLT_PREOP_CALLBACK_STATUS FltDirCtrlPreOperation(PFLT_CALLBACK_DATA pData,
 
 	if (!IsDriverEnabled())
 		return FLT_POSTOP_FINISHED_PROCESSING;
-
-	LogInfo("%wZ", &pData->Iopb->TargetFileObject->FileName);
 
 	if (pData->Iopb->MinorFunction != IRP_MN_QUERY_DIRECTORY)
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
@@ -586,8 +582,6 @@ FLT_POSTOP_CALLBACK_STATUS FltDirCtrlPostOperation(PFLT_CALLBACK_DATA pData,
 
 	if (!NT_SUCCESS(pData->IoStatus.Status))
 		return FLT_POSTOP_FINISHED_PROCESSING;
-
-	LogInfo("%wZ", &pData->Iopb->TargetFileObject->FileName);
 
 	if (IsProcessExcluded(PsGetCurrentProcessId())) {
 		LogTrace("Operation is skipped for excluded process.");
@@ -770,6 +764,8 @@ NTSTATUS InitializeFSMiniFilter(PDRIVER_OBJECT pDriverObject) {
 		}
 	} else {
 		LogError("FltRegisterFilter failed with code %08x.", status);
+		DestroyExclusionListContext(g_excludedFilesContext);
+		DestroyExclusionListContext(g_excludedDirectoriesContext);
 	}
 
 	if (NT_SUCCESS(status)) {
