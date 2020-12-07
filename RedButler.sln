@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RedPackage", "RedPackage\Re
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RedLibrary", "RedLibrary\RedLibrary.vcxproj", "{815B0A49-6677-4DD5-9F9B-1B95826DC7BE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RedCLI", "RedCLI\RedCLI.vcxproj", "{432FC71F-7971-464D-B5FF-AB5576EAEC70}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -81,6 +83,18 @@ Global
 		{815B0A49-6677-4DD5-9F9B-1B95826DC7BE}.Release|x64.Build.0 = Release|x64
 		{815B0A49-6677-4DD5-9F9B-1B95826DC7BE}.Release|x86.ActiveCfg = Release|Win32
 		{815B0A49-6677-4DD5-9F9B-1B95826DC7BE}.Release|x86.Build.0 = Release|Win32
+		{432FC71F-7971-464D-B5FF-AB5576EAEC70}.Debug|ARM.ActiveCfg = Debug|Win32
+		{432FC71F-7971-464D-B5FF-AB5576EAEC70}.Debug|ARM64.ActiveCfg = Debug|Win32
+		{432FC71F-7971-464D-B5FF-AB5576EAEC70}.Debug|x64.ActiveCfg = Debug|x64
+		{432FC71F-7971-464D-B5FF-AB5576EAEC70}.Debug|x64.Build.0 = Debug|x64
+		{432FC71F-7971-464D-B5FF-AB5576EAEC70}.Debug|x86.ActiveCfg = Debug|Win32
+		{432FC71F-7971-464D-B5FF-AB5576EAEC70}.Debug|x86.Build.0 = Debug|Win32
+		{432FC71F-7971-464D-B5FF-AB5576EAEC70}.Release|ARM.ActiveCfg = Release|Win32
+		{432FC71F-7971-464D-B5FF-AB5576EAEC70}.Release|ARM64.ActiveCfg = Release|Win32
+		{432FC71F-7971-464D-B5FF-AB5576EAEC70}.Release|x64.ActiveCfg = Release|x64
+		{432FC71F-7971-464D-B5FF-AB5576EAEC70}.Release|x64.Build.0 = Release|x64
+		{432FC71F-7971-464D-B5FF-AB5576EAEC70}.Release|x86.ActiveCfg = Release|Win32
+		{432FC71F-7971-464D-B5FF-AB5576EAEC70}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
