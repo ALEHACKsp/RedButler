@@ -341,7 +341,7 @@ void Butler::UnhideDirectory(ULONG uObjectId) {
 	}
 }
 
-void Butler::UNhideAllDirectories() {
+void Butler::UnhideAllDirectories() {
 	if (!IsOpen()) {
 		throw Red::Exception(STATUS_INTERRUPTED, L"Driver connection not in place.");
 	}

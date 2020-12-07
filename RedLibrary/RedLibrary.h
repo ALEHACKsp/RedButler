@@ -49,6 +49,6 @@ namespace Red {
 
 		ULONG HideDirectory(std::wstring directoryPath);
 		void UnhideDirectory(ULONG uObjectId);
-		void UNhideAllDirectories();
+		void UnhideAllDirectories();
 	};
 }
