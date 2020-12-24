@@ -5,7 +5,7 @@
 
 <p align="center">
   <a href="https://github.com/Zeta314/RedButler">
-    <img src="images/logo.png" alt="Logo">
+    <img src="images/logo.png" alt="Logo" width="500" height="350">
   </a>
 
   <h3 align="center">RedButler</h3>
