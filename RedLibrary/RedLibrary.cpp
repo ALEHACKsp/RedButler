@@ -349,7 +349,7 @@ ULONG Butler::HideFile(std::wstring filePath) {
 		throw Red::Exception(result.ntStatus, L"Failed to hide target file.");
 	}
 
-	return packet.uObjectId;
+	return result.info.uObjectId;
 }
 
 void Butler::UnhideFile(ULONG uObjectId) {
@@ -404,7 +404,7 @@ ULONG Butler::HideDirectory(std::wstring directoryPath) {
 		throw Red::Exception(result.ntStatus, L"Failed to hide target directory.");
 	}
 
-	return packet.uObjectId;
+	return result.info.uObjectId;
 }
 
 void Butler::UnhideDirectory(ULONG uObjectId) {

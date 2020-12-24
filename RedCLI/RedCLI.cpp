@@ -97,13 +97,10 @@ void FilesystemCommand(args::Subparser& parser) {
 			args::Flag unhide(actions, "unhide", "unhide the target object", { "unhide" });
 
 		args::Group objects(arguments, "objects", args::Group::Validators::Xor);
-			args::Flag file(actions, "file", "the process is a file", { "file", 'F' });
-			args::Flag directory(actions, "directory", "the object is a directory", { "directory", 'D' });
+			args::Flag file(objects, "file", "the process is a file", { "file", 'F' });
+			args::Flag directory(objects, "directory", "the object is a directory", { "directory", 'D' });
 
-		args::Group targets(arguments, "targets", args::Group::Validators::Xor);
-			args::Positional<std::string> path(arguments, "path", "the path to the object");
-			args::Positional<ULONG> objid(arguments, "objid", "the id of the filesystem rule");
-			args::Flag everything(targets, "all", "match everything", { "all" });
+		args::Positional<std::string> object(arguments, "object", "the actual object", args::Options::Required);
 
 	parser.Parse();
 
@@ -113,15 +110,10 @@ void FilesystemCommand(args::Subparser& parser) {
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
 	if (hide) {
-		if (everything) {
-			std::cerr << "You cannot use --all while hiding." << std::endl;
-			driver.Close();
-			return;
-		}
-
 		if (file) {
 			try {
-				ULONG uObjectId = driver.HideFile(converter.from_bytes(path.Get()));
+				std::cout << "Hiding file " << object.Get() << "..." << std::endl;
+				ULONG uObjectId = driver.HideFile(converter.from_bytes(object.Get()));
 				std::cout << "Success! Object ID: " << uObjectId << std::endl;
 			}
 
@@ -130,7 +122,8 @@ void FilesystemCommand(args::Subparser& parser) {
 			}
 		} else if (directory) {
 			try {
-				ULONG uObjectId = driver.HideDirectory(converter.from_bytes(path.Get()));
+				std::cout << "Hiding directory " << object.Get() << "..." << std::endl;
+				ULONG uObjectId = driver.HideDirectory(converter.from_bytes(object.Get()));
 				std::cout << "Success! Object ID: " << uObjectId << std::endl;
 			}
 
@@ -140,44 +133,24 @@ void FilesystemCommand(args::Subparser& parser) {
 		}
 	} else if (unhide) {
 		if (file) {
-			if (everything) {
-				try {
-					driver.UnhideAllFiles();
-					std::cout << "Success!" << std::endl;
-				}
+			try {
+				std::cout << "Unhiding file " << object.Get() << "..." << std::endl;
+				driver.UnhideFile(strtoul(object.Get().c_str(), NULL, 10));
+				std::cout << "Success!" << std::endl;
+			}
 
-				catch (Red::Exception& e) {
-					std::wcerr << "Error " << e.Code() << ": " << e.What() << std::endl;
-				}
-			} else {
-				try {
-					driver.UnhideFile(objid.Get());
-					std::cout << "Success!" << std::endl;
-				}
-
-				catch (Red::Exception& e) {
-					std::wcerr << "Error " << e.Code() << ": " << e.What() << std::endl;
-				}
+			catch (Red::Exception& e) {
+				std::wcerr << "Error " << e.Code() << ": " << e.What() << std::endl;
 			}
 		} else if (directory) {
-			if (everything) {
-				try {
-					driver.UnhideAllDirectories();
-					std::cout << "Success!" << std::endl;
-				}
+			try {
+				std::cout << "Unhiding directory " << object.Get() << "..." << std::endl;
+				driver.UnhideDirectory(strtoul(object.Get().c_str(), NULL, 10));
+				std::cout << "Success!" << std::endl;
+			}
 
-				catch (Red::Exception& e) {
-					std::wcerr << "Error " << e.Code() << ": " << e.What() << std::endl;
-				}
-			} else {
-				try {
-					driver.UnhideDirectory(objid.Get());
-					std::cout << "Success!" << std::endl;
-				}
-
-				catch (Red::Exception& e) {
-					std::wcerr << "Error " << e.Code() << ": " << e.What() << std::endl;
-				}
+			catch (Red::Exception& e) {
+				std::wcerr << "Error " << e.Code() << ": " << e.What() << std::endl;
 			}
 		}
 	}
