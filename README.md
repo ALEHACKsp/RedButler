@@ -8,7 +8,7 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">project_title</h3>
+  <h3 align="center">RedButler</h3>
 
   <p align="center">
     RedButler is a windows kernel driver that lets you acquire the super powers of ring 0
